@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict Diabetes</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('/static/diabe/ABCD2.png'); /* Caminho relativo ao diretório de arquivos estáticos */
+            background-size: cover;
+            background-attachment: fixed;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .input-box {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px; /* Aumente a largura máxima da caixa */
+            width: 100%; /* Ajusta a largura para 100% */
+        }
+
+        .input-box h2 {
+            color: #007F75; /* Cor azul esverdeado para o título */
+            font-size: 24px; /* Tamanho da fonte do título */
+            margin-bottom: 20px; /* Espaço abaixo do título */
+        }
+
+        .input-box input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .input-box button {
+            background-color: #007F75; /* Cor igual à do botão "Start" */
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .input-box button:hover {
+            background-color: #00524A; /* Cor de hover igual à do botão "Start" */
+        }
+
+        .result-box {
+            display: none; /* Inicialmente oculta */
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px; /* Aumente a largura máxima da caixa de resultado */
+            width: 100%; /* Ajusta a largura para 100% */
+            margin-top: 20px; /* Espaço acima da caixa de resultado */
+        }
+
+        .result-box h2 {
+            color: #007F75; /* Cor azul esverdeado para o título da caixa de resultado */
+            font-size: 24px; /* Tamanho da fonte do título */
+            margin-bottom: 20px; /* Espaço abaixo do título */
+        }
+
+        /* Estilo do botão para voltar à página home.html */
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #007F75; /* Cor igual à do botão "Start" */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #00524A; /* Cor de hover igual à do botão "Start" */
+        }
+    </style>
+</head>
+<body>
+    <!-- Botão para voltar à página home.html -->
+    <a class="back-button" href="{% url 'home' %}">Back to Home</a>
+
+    <div class="input-box">
+        <h2>Enter The Following Information</h2>
+        <form id="diagnosis-form" action="{% url 'result' %}" method="post">
+            {% csrf_token %}
+            <!-- Campos para entrada dos 8 valores -->
+            <input type="text" name="Pregnancies" placeholder="Pregnancies" required><br>
+            <input type="text" name="Glucose" placeholder="Glucose" required><br>
+            <input type="text" name="Blood Pressure" placeholder="Blood Pressure" required><br>
+            <input type="text" name="Skin Thickness" placeholder="Skin Thickness" required><br>
+            <input type="text" name="Insulin" placeholder="Insulin" required><br>
+            <input type="text" name="BMI" placeholder="BMI" required><br>
+            <input type="text" name="Diabetes Pedigree Function" placeholder="Diabetes Pedigree Function" required><br>
+            <input type="text" name="Age" placeholder="Age" required><br>
+
+           <button type="submit">Diagnosis</button>
+        </form>
+    </div>
+
+    <!-- Caixa de resultado -->
+    <div class="result-box" id="result-box">
+        <h2>Diabetes Diagnosis Result</h2>
+        <p id="result-text">Result: </p>
+        <a href="{% url 'predict' %}">Back to Prediction</a>
+    </div>
+
+    <script>
+        document.getElementById('diagnosis-form').addEventListener('submit', function (e) {
+            e.preventDefault(); // Impede o envio padrão do formulário
+
+            // Coleta os dados do formulário
+            var formData = new FormData(this);
+
+            // Enviar os dados para o servidor via AJAX
+            fetch('{% url 'result' %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // Envia o CSRF token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Atualiza a interface do usuário com o resultado
+                document.getElementById('result-text').textContent = 'Result: ' + data.result;
+                document.getElementById('result-box').style.display = 'block';
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
